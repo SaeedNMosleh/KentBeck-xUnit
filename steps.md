@@ -4,8 +4,9 @@ This document outlines the steps to implement Test-Driven Development (TDD) in a
 ## Step 1 : ToDo List
 - [x] Invoke test method
 - [x] Invoke setUp first
-- [ ] Invoke tearDown afterward
+- [x] Invoke tearDown afterward
 - [ ] Invoke tearDown even if the test method fails
 - [ ] Run multiple tests
 - [ ] Report collected results
+- [x] Log string in WasRun
 
