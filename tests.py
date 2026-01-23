@@ -3,7 +3,7 @@ class TestCase:
         self.name = name
     def setUp(self):
         pass
-    def run(self):
+    def run(self,result):
         result = TestResult()
         result.testStarted()
         try:
@@ -16,6 +16,7 @@ class TestCase:
         return result
     def tearDown(self):
         pass
+
         
 
 
@@ -38,32 +39,46 @@ class WasRun(TestCase):
 
 class TestCaseTest(TestCase):
     def setUp(self):
-        self.test = WasRun("testMethod")
+        self.result = TestResult()
     def testTemplateMethod(self):
         test = WasRun("testMethod")
-        test.run()
+        test.run(self.result)
         assert("setUp testMethod tearDown " == test.log)
     def testResult(self):
         test = WasRun("testMethod")
-        result = test.run()
+        test.run(self.result)
         assert("1 run, 0 failed" == result.summary())
     def testFailedResult(self):
         test = WasRun("testBrokenMethod")
-        result = test.run()
-        assert("1 run, 1 failed", result.summary)
+        test.run(self.result)
+        assert("1 run, 1 failed", result.summary())
     def testFailedResultFormatting(self):
+        self.result.testStarted()
+        self.result.testFailed()
+        assert("1 run, 1 failed" == self.result.summary())
+    def testSuite(self):
+        suite = TestSuite()
+        suite.add(WasRun("testMethod"))
+        suite.add(WasRun("testBrokenMethod"))
         result = TestResult()
-        result.testStarted()
-        result.testFailed()
-        assert("1 run, 1 failed" == result.summary())
+        suite.run(self.result)
+        assert("2 run, 1 failed" == self.result.summary())
     #Write a test to catch and report setUp errors
     def testSetup(self):
         test = WasRun("testMethod")
         test.setUp = lambda: 1/0  # Override setUp to raise an exception
         result = test.run()
         assert("1 run, 1 failed" == result.summary())
+
+class TestSuite:
+    def __init__(self) -> None:
+        self.tests = []
+    def add(self,test):
+        self.tests.append(test)
+    def run(self,result):
+        for test in self.tests:
+            test.run(result)
         
-    
 class TestResult:
     def __init__(self):
         self.runCount =0
@@ -75,10 +90,16 @@ class TestResult:
     def summary(self):
         return "%d run, %d failed" % (self.runCount , self.errorCount)
     
-    
 
-#TestCaseTest("testRunning").run()
-#TestCaseTest("testSetup").run()
+suite = TestSuite()
+suite.add(TestCaseTest("testTemplateMethod"))
+suite.add(TestCaseTest("testResult"))
+suite.add(TestCaseTest("testFailedResult"))
+suite.add(TestCaseTest("testFailedResultFormatting"))
+suite.add(TestCaseTest("testSuite"))
+result = TestResult()
+suite.run(result)
+print(result.summary())
 
 
  
